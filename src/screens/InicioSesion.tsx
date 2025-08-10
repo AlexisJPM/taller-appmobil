@@ -1,18 +1,43 @@
 import React, { useState } from 'react';
-import {
-    StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert} from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { styless } from '../theme/appTheme';
+import { CommonActions, useNavigation } from '@react-navigation/native';
+
+interface FormLogin {
+    nombreUsuario: string;
+    password: string;
+}
 
 export const InicioSesion = () => {
-    const [nombreUsuario, setNombreUsuario] = useState('');
-    const [password, setPassword] = useState('');
+    const [formLogin, setFormLogin] = useState<FormLogin>({
+        nombreUsuario: '',
+        password: ''
+    });
 
-    const validarRegistro = () => {
-        if (!nombreUsuario || !password) {
+    const [hiddenPassword, setHiddenPassword] = useState<boolean>(true)
+
+    //funcion para actualizar el formulario
+    const changeForm = (property: string, value: string): void => {
+        setFormLogin({ ...formLogin, [property]: value });
+    };
+
+    const handleLogin = () => {
+        if (!formLogin.nombreUsuario || !formLogin.password) {
             Alert.alert('Error', 'Todos los campos son obligatorios');
             return;
         }
         Alert.alert('Éxito', 'Registro completado con éxito');
+
+        console.log(formLogin);
+
+        setFormLogin({
+            nombreUsuario: '',
+            password: '',
+        });
     };
+
+    const navigation = useNavigation();
 
     return (
 
@@ -24,33 +49,38 @@ export const InicioSesion = () => {
                 <TextInput
                     style={styles.input}
                     placeholder="Ingresa tu nombre de usuario"
-                    value={nombreUsuario}
-                    onChangeText={setNombreUsuario}
-                    autoCapitalize="words"
+                    onChangeText={(value) => changeForm('nombreUsuario', value)}
+                    value={formLogin.nombreUsuario}
                 />
 
                 <Text style={styles.label}>Contraseña</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Ingresa tu contraseña"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
+                    onChangeText={(value) => changeForm('password', value)}
+                    value={formLogin.password}
+                    secureTextEntry={hiddenPassword}
                 />
+                <Icon name={hiddenPassword ? 'visibility' : 'visibility-off'}
+                    size={23}
+                    style={styles.iconForm}
+                    onPress={() => setHiddenPassword(!hiddenPassword)} />
 
                 <View style={styles.botonesContainer}>
                     <TouchableOpacity
                         style={[styles.boton, styles.botonRegistro]}
-                        onPress={validarRegistro}
+                        onPress={handleLogin}
                     >
                         <Text style={styles.textoBoton}>Ingresar</Text>
                     </TouchableOpacity>
                 </View>
 
-                <Text style={styles.textoLogin}>
-                    ¿No tienes una cuenta?
-                    <Text style={styles.textoLoginLink}> Registrarse</Text>
-                </Text>
+                <View>
+                    <Text style={styless.textoLogin}>¿No tienes una cuenta?</Text>
+                    <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({ name: 'Registro' }))}>
+                        <Text style={styless.textoLoginLink}> Registrarse</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
         </ScrollView>
     );
@@ -77,7 +107,7 @@ const styles = StyleSheet.create({
         color: 'black',
     },
     label: {
-        fontSize: 16,        
+        fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 2,
         color: 'black',
@@ -112,13 +142,9 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
-    textoLogin: {
-        marginTop: 20,
-        textAlign: 'center',
-        color: 'white',
-    },
-    textoLoginLink: {
-        color: 'black',
-        fontWeight: 'bold',
-    },
+    iconForm: {
+        position: 'absolute',
+        bottom: 190,
+        right: 40
+    }
 });

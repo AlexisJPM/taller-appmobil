@@ -1,25 +1,60 @@
 import React, { useState } from 'react';
 import {
-    StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert} from 'react-native';
+    StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert
+} from 'react-native';
+import { styless } from '../theme/appTheme';
+import { CommonActions, useNavigation } from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+
+interface FormLogin {
+    nombre: string;
+    nombreUsuario: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+}
 
 export const Registro = () => {
-    const [nombre, setNombre] = useState('');
-    const [nombreUsuario, setNombreUsuario] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [formLogin, setFormLogin] = useState<FormLogin>({
+        nombre: '',
+        nombreUsuario: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+    });
 
-    const validarRegistro = () => {
-        if (!nombre || !nombreUsuario || !email || !password || !confirmPassword) {
+    const [hiddenPassword, setHiddenPassword] = useState<boolean>(true)
+    const [hiddenCPassword, setHiddenCPassword] = useState<boolean>(true)
+
+    //funcion para actualizar el formulario
+    const changeForm = (property: string, value: string): void => {
+        setFormLogin({ ...formLogin, [property]: value });
+    };
+
+    const handleRegister = () => {
+        if (!formLogin.nombre || !formLogin.nombreUsuario || !formLogin.email
+            || !formLogin.password || !formLogin.confirmPassword) {
             Alert.alert('Error', 'Todos los campos son obligatorios');
             return;
         }
-        if (password !== confirmPassword) {
+        if (formLogin.password !== formLogin.confirmPassword) {
             Alert.alert('Error', 'Las contraseñas no coinciden');
             return;
         }
         Alert.alert('Éxito', 'Registro completado con éxito');
+        console.log(formLogin);
+
+        setFormLogin({
+            nombre:'',
+            nombreUsuario: '',
+            email:'',
+            password: '',
+            confirmPassword: '',
+        });
+
     };
+
+    const navigation = useNavigation();
 
     return (
 
@@ -31,67 +66,72 @@ export const Registro = () => {
                 <TextInput
                     style={styles.input}
                     placeholder="Ingresa tu nombre"
-                    value={nombre}
-                    onChangeText={setNombre}
-                    autoCapitalize="words"
+                    onChangeText={(value) => changeForm('nombre', value)}
+                    value={formLogin.nombre}
                 />
 
                 <Text style={styles.label}>Nombre de Usuario</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Ingresa tu nombre de usuario"
-                    value={nombreUsuario}
-                    onChangeText={setNombreUsuario}
-                    autoCapitalize="words"
+                    onChangeText={(value) => changeForm('nombreUsuario', value)}
+                    value={formLogin.nombreUsuario}
                 />
 
                 <Text style={styles.label}>Correo electrónico</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Ingresa tu email"
-                    value={email}
-                    onChangeText={setEmail}
+                    onChangeText={(value) => changeForm('email', value)}
+                    value={formLogin.email}
                     keyboardType="email-address"
-                    autoCapitalize="none"
                 />
 
-                <Text style={styles.label}>Contraseña</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Crea una contraseña"
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                />
+                <View>
+                    <Text style={styles.label}>Contraseña</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Crea una contraseña"
+                        onChangeText={(value) => changeForm('password', value)}
+                        value={formLogin.password}
+                        secureTextEntry={hiddenPassword}
+                    />
+                    <Icon name={hiddenPassword ? 'visibility' : 'visibility-off'}
+                        size={30}
+                        style={styles.iconForm}
+                        onPress={() => setHiddenPassword(!hiddenPassword)} />
 
-                <Text style={styles.label}>Confirmar contraseña</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Repite tu contraseña"
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                    secureTextEntry
-                />
+                    <Text style={styles.label}>Confirmar contraseña</Text>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="Repite tu contraseña"
+                        onChangeText={(value) => changeForm('confirmPassword', value)}
+                        value={formLogin.confirmPassword}
+                        secureTextEntry={hiddenCPassword}
+                    />
+                    <Icon name={hiddenCPassword ? 'visibility' : 'visibility-off'}
+                        size={30}
+                        style={styles.iconForm2}
+                        onPress={() => setHiddenCPassword(!hiddenCPassword)} />
+                </View>
 
                 <View style={styles.botonesContainer}>
                     <TouchableOpacity
                         style={[styles.boton, styles.botonRegistro]}
-                        onPress={validarRegistro}
-                    >
+                        onPress={handleRegister}>
                         <Text style={styles.textoBoton}>Registrarme</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={[styles.boton, styles.botonCancelar]}
-                    >
+                        style={[styles.boton, styles.botonCancelar]}>
                         <Text style={styles.textoBoton}>Cancelar</Text>
                     </TouchableOpacity>
                 </View>
 
-                <Text style={styles.textoLogin}>
-                    ¿Ya tienes una cuenta?
-                    <Text style={styles.textoLoginLink}> Inicia sesión</Text>
-                </Text>
+                <Text style={styless.textoLogin}>¿Ya tienes una cuenta?</Text>
+                <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({ name: 'Inicio' }))}>
+                    <Text style={styless.textoLoginLink}> Inicia sesión</Text>
+                </TouchableOpacity>
             </View>
         </ScrollView>
     );
@@ -106,7 +146,7 @@ const styles = StyleSheet.create({
     formContainer: {
         padding: 20,
         marginHorizontal: 20,
-       backgroundColor: '#04687F',
+        backgroundColor: '#04687F',
         borderRadius: 10,
         elevation: 5,
     },
@@ -118,7 +158,7 @@ const styles = StyleSheet.create({
         color: 'black',
     },
     label: {
-        fontSize: 16,        
+        fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 2,
         color: 'black',
@@ -156,13 +196,14 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
-    textoLogin: {
-        marginTop: 20,
-        textAlign: 'center',
-        color: '#ddd',
+    iconForm: {
+        position: 'absolute',
+        bottom: 115,
+        right: 20
     },
-    textoLoginLink: {
-        color: 'black',
-        fontWeight: 'bold',
-    },
+    iconForm2: {
+        position: 'absolute',
+        bottom: 25,
+        right: 20
+    }
 });

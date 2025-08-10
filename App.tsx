@@ -1,15 +1,15 @@
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Registro } from './src/screens/Registro';
-import { InicioSesion } from './src/screens/InicioSesion';
+import { NavigationContainer } from '@react-navigation/native';
+import { StackNavigator } from './src/navigation/StackNavigator';
 
 const App = () => {
   return (
     <SafeAreaView style={{flex:1}}>
-    <Registro/>
-    {/* <InicioSesion/> */}
+      <NavigationContainer>
+        <StackNavigator/>
+      </NavigationContainer>
     </SafeAreaView>
   )
 }
-
 export default App;
