@@ -2,22 +2,28 @@ import React, { useState } from 'react';
 import {
     StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert
 } from 'react-native';
-import { styless } from '../theme/appTheme';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { globalStyles } from '../theme/appTheme';
+import { User } from '../navigation/StackNavigator';
 
-interface FormLogin {
-    nombre: string;
-    nombreUsuario: string;
+interface Props {
+    users: User[];
+    addUser: (user: User) => void;
+}
+
+interface FormRegister {
+    name: string;
+    username: string;
     email: string;
     password: string;
     confirmPassword: string;
 }
 
-export const Registro = () => {
-    const [formLogin, setFormLogin] = useState<FormLogin>({
-        nombre: '',
-        nombreUsuario: '',
+export const Registro = ({ users, addUser }: Props) => {
+    const [formRegister, setFormRegister] = useState<FormRegister>({
+        name: '',
+        username: '',
         email: '',
         password: '',
         confirmPassword: ''
@@ -28,30 +34,54 @@ export const Registro = () => {
 
     //funcion para actualizar el formulario
     const changeForm = (property: string, value: string): void => {
-        setFormLogin({ ...formLogin, [property]: value });
+        setFormRegister({ ...formRegister, [property]: value });
     };
 
+    //función para verificar si existe el usuario
+    const verifyUsername = (): User | undefined => {
+        const existUsername = users.find(user => user.username == formRegister.username);
+        return existUsername;
+    }
+
+    //función para generar los ids de los nuevos usuarios
+    const getIdUser = (): number => {
+        const getId = users.length + 1;
+        return getId;
+    }
+
     const handleRegister = () => {
-        if (!formLogin.nombre || !formLogin.nombreUsuario || !formLogin.email
-            || !formLogin.password || !formLogin.confirmPassword) {
+        if (!formRegister.name || !formRegister.username || !formRegister.email
+            || !formRegister.password || !formRegister.confirmPassword) {
             Alert.alert('Error', 'Todos los campos son obligatorios');
             return;
         }
-        if (formLogin.password !== formLogin.confirmPassword) {
+
+        if (formRegister.password !== formRegister.confirmPassword) {
             Alert.alert('Error', 'Las contraseñas no coinciden');
             return;
         }
-        Alert.alert('Éxito', 'Registro completado con éxito');
-        console.log(formLogin);
 
-        setFormLogin({
-            nombre:'',
-            nombreUsuario: '',
-            email:'',
-            password: '',
-            confirmPassword: '',
-        });
+        //Validar que no exista el usuario
+        if (verifyUsername() != undefined) {
+            Alert.alert('Error', 'El usuario ya existe');
+            return;
+        }
 
+        //Crear nuevo usuario - objeto User
+        const newUser: User = {
+            id: getIdUser(),
+            name: formRegister.name,
+            username: formRegister.username,
+            email: formRegister.email,
+            password: formRegister.password,
+            confirmPassword: formRegister.confirmPassword
+        }
+
+        //Añadir en el arreglo
+        addUser(newUser);
+        Alert.alert('Éxito', 'Usuario registrado correctamente');
+        
+        navigation.goBack();
     };
 
     const navigation = useNavigation();
@@ -66,16 +96,16 @@ export const Registro = () => {
                 <TextInput
                     style={styles.input}
                     placeholder="Ingresa tu nombre"
-                    onChangeText={(value) => changeForm('nombre', value)}
-                    value={formLogin.nombre}
+                    onChangeText={(value) => changeForm('name', value)}
+                    value={formRegister.name}
                 />
 
                 <Text style={styles.label}>Nombre de Usuario</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Ingresa tu nombre de usuario"
-                    onChangeText={(value) => changeForm('nombreUsuario', value)}
-                    value={formLogin.nombreUsuario}
+                    onChangeText={(value) => changeForm('username', value)}
+                    value={formRegister.username}
                 />
 
                 <Text style={styles.label}>Correo electrónico</Text>
@@ -83,7 +113,7 @@ export const Registro = () => {
                     style={styles.input}
                     placeholder="Ingresa tu email"
                     onChangeText={(value) => changeForm('email', value)}
-                    value={formLogin.email}
+                    value={formRegister.email}
                     keyboardType="email-address"
                 />
 
@@ -93,7 +123,7 @@ export const Registro = () => {
                         style={styles.input}
                         placeholder="Crea una contraseña"
                         onChangeText={(value) => changeForm('password', value)}
-                        value={formLogin.password}
+                        value={formRegister.password}
                         secureTextEntry={hiddenPassword}
                     />
                     <Icon name={hiddenPassword ? 'visibility' : 'visibility-off'}
@@ -106,7 +136,7 @@ export const Registro = () => {
                         style={styles.input}
                         placeholder="Repite tu contraseña"
                         onChangeText={(value) => changeForm('confirmPassword', value)}
-                        value={formLogin.confirmPassword}
+                        value={formRegister.confirmPassword}
                         secureTextEntry={hiddenCPassword}
                     />
                     <Icon name={hiddenCPassword ? 'visibility' : 'visibility-off'}
@@ -119,7 +149,7 @@ export const Registro = () => {
                     <TouchableOpacity
                         style={[styles.boton, styles.botonRegistro]}
                         onPress={handleRegister}>
-                        <Text style={styles.textoBoton}>Registrarme</Text>
+                        <Text style={styles.textoBoton}>Registrar</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -128,9 +158,9 @@ export const Registro = () => {
                     </TouchableOpacity>
                 </View>
 
-                <Text style={styless.textoLogin}>¿Ya tienes una cuenta?</Text>
+                <Text style={globalStyles.textoLogin}>¿Ya tienes una cuenta?</Text>
                 <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({ name: 'Inicio' }))}>
-                    <Text style={styless.textoLoginLink}> Inicia sesión</Text>
+                    <Text style={globalStyles.textoLoginLink}> Inicia sesión</Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>

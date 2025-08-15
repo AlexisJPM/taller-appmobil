@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { styless } from '../theme/appTheme';
 import { CommonActions, useNavigation } from '@react-navigation/native';
+import { globalStyles } from '../theme/appTheme';
+import { User } from '../navigation/StackNavigator';
+
+interface Props {
+    users: User[];
+}
 
 interface FormLogin {
-    nombreUsuario: string;
+    username: string;
     password: string;
 }
 
-export const InicioSesion = () => {
+export const InicioSesion = ({ users }: Props) => {
+
     const [formLogin, setFormLogin] = useState<FormLogin>({
-        nombreUsuario: '',
+        username: '',
         password: ''
     });
 
@@ -22,19 +28,25 @@ export const InicioSesion = () => {
         setFormLogin({ ...formLogin, [property]: value });
     };
 
-    const handleLogin = () => {
-        if (!formLogin.nombreUsuario || !formLogin.password) {
+    const verifyUser = () => {
+        const existUser = users.find(user => user.username == formLogin.username && user.password == formLogin.password);
+        return existUser;
+    }
+
+    const handleLogin = (): void => {
+        if (!formLogin.username || !formLogin.password) {
             Alert.alert('Error', 'Todos los campos son obligatorios');
             return;
         }
-        Alert.alert('Éxito', 'Registro completado con éxito');
+        if (!verifyUser()) {
+            Alert.alert('Error', 'Usuario y/o contraseña incorrecta')
+            
+            return;
+        }
+        Alert.alert('Registro completado con éxito');
 
-        console.log(formLogin);
+        navigation.dispatch(CommonActions.navigate({ name: 'Home' }))
 
-        setFormLogin({
-            nombreUsuario: '',
-            password: '',
-        });
     };
 
     const navigation = useNavigation();
@@ -49,8 +61,8 @@ export const InicioSesion = () => {
                 <TextInput
                     style={styles.input}
                     placeholder="Ingresa tu nombre de usuario"
-                    onChangeText={(value) => changeForm('nombreUsuario', value)}
-                    value={formLogin.nombreUsuario}
+                    onChangeText={(value) => changeForm('username', value)}
+                    value={formLogin.username}
                 />
 
                 <Text style={styles.label}>Contraseña</Text>
@@ -76,9 +88,9 @@ export const InicioSesion = () => {
                 </View>
 
                 <View>
-                    <Text style={styless.textoLogin}>¿No tienes una cuenta?</Text>
+                    <Text style={globalStyles.textoLogin}>¿No tienes una cuenta?</Text>
                     <TouchableOpacity onPress={() => navigation.dispatch(CommonActions.navigate({ name: 'Registro' }))}>
-                        <Text style={styless.textoLoginLink}> Registrarse</Text>
+                        <Text style={globalStyles.textoLoginLink}> Registrarse</Text>
                     </TouchableOpacity>
                 </View>
             </View>
